@@ -1,37 +1,39 @@
-import mongoose, {Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const userSchema = new Schema({
 
-    userName:{
-        type:String,
-        require:true,
-        unique:true,
-        lowercase:true,
-        index:true,
-        trim:true
+    username: {
+        type: String,
+        // required: true,
+        unique: true,
+        lowercase: true,
+        index: true,
+        trim: true
     },
-    email:{
-        type:String,
-        require:true,
-        unique:true,
-        lowercase:true,
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
     },
-    binHistory:{
-        // TODO:do it leter
+    binHistory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+        // required: true,
     },
 
-    password:{
-        type:String,
-        require:[true,"password is requird"],
+    password: {
+        type: String,
+        required: [true, "password is requird"],
     },
-    refreshToken:{
-            type: String,
-        },
+    refreshToken: {
+        type: String,
+    },
 
 
-},{timestamps:true})
+}, { timestamps: true })
 
 
 userSchema.pre("save", async function (next) {
@@ -48,7 +50,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 
-userSchema.methods.generateAccessToken= function(){
+userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         {
             _id: this._id,
@@ -58,15 +60,15 @@ userSchema.methods.generateAccessToken= function(){
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiresIn:process.env.ACCESS_TOKEN_EXPIRE,
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRE,
         }
     )
 }
 
-userSchema.methods.generateRefreshToken=function(){
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
-            _id:this._id,
+            _id: this._id,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
