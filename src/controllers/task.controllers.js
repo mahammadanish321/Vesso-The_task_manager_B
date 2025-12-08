@@ -17,42 +17,32 @@ const taskCreate = asyncHandler(async (req, res) => {
         description,
         owner: owner,
     })
-
     const createdTask = await Task.findById(task._id).select("-passwoed")
-
-
     if (!createdTask) {
         throw new ApiError(401, "During task creation have any problem")
     }
-
     return res
         .status(200)
         .json(
             new ApiResponce(200, createdTask, "task created successfully")
         )
 })
-
 const taskComplete = asyncHandler(async (req, res) => {
     const { taskId } = req.body
     // console.log(taskId);
     const task = await Task.findById(taskId);
-
-
     const updatedTaskCompleteOrNot = await Task.findByIdAndUpdate(taskId,
         {
             $set:
             {
                 isCompleted: !task.isCompleted,
             }
-
         },
         { new: true }
     );
-
-    if (!updatedTaskCompleteOrNot) throw new ApiError(404, "Task not found");
-
-
-
+    if (!updatedTaskCompleteOrNot){
+         throw new ApiError(404, "Task not found");
+    }
     return res
         .status(200)
         .json(
@@ -60,7 +50,6 @@ const taskComplete = asyncHandler(async (req, res) => {
         )
 
 })
-
 const taskDelete_bin = asyncHandler(async (req, res) => {
     const { taskId } = req.body
     // console.log("=======>",taskId);
@@ -82,11 +71,45 @@ const taskDelete_bin = asyncHandler(async (req, res) => {
         .json(
             new ApiResponce(200, updatedTaskDeleteOrNot_moveToBin, "Task move to resycle Bin succsfully")
         )
-
-
 })
+const taskTotallyDelete = asyncHandler(async (req, res) => {
+    const { taskId } = req.body
+    const task = await Task.findById(taskId)
+    if (!task) {
+        throw new ApiError(404, "Task not found")
+    }
+    const DeletedTask = await Task.findByIdAndDelete(taskId)
 
-
-
-
-export { taskCreate, taskComplete, taskDelete_bin };
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(200, DeletedTask, "task dlt succesfully")
+        )
+})
+const editTask = asyncHandler(async (req, res) => {
+    const { taskId } = req.body
+    const taskExistOrNot= await Task.findById(taskId)
+    if(!taskExistOrNot){
+        throw new ApiError(404,"the task on this id the not found")
+    }
+    // console.log("========>", taskId);
+    const { taskName, description } =req.body
+    // console.log("=======>", taskName, description);
+    if (!taskName || !description || !taskId) {
+       throw new ApiError(401,"something is missing hear")
+    }
+    const editedTask = await Task.findByIdAndUpdate(taskId,
+        {
+            $set:{
+                taskName:taskName,
+                description:description,
+            }
+        },{new:true}
+    )
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(200,editedTask,"the update succesfully")
+    )
+})
+export { taskCreate, taskComplete, taskDelete_bin, taskTotallyDelete,editTask };
