@@ -32,10 +32,6 @@ const taskCreate = asyncHandler(async (req, res) => {
         )
 })
 
-
-//take the bollean value from the request
-//if its true the mark the task as complete if not the then leave at its defult from
-//sent the responce
 const taskComplete = asyncHandler(async (req, res) => {
     const { taskId } = req.body
     // console.log(taskId);
@@ -46,34 +42,51 @@ const taskComplete = asyncHandler(async (req, res) => {
         {
             $set:
             {
-            isCompleted: !task.isCompleted,
+                isCompleted: !task.isCompleted,
             }
 
         },
-    { new: true }
-);
+        { new: true }
+    );
 
-if (!updatedTaskCompleteOrNot) throw new ApiError(404, "Task not found");
+    if (!updatedTaskCompleteOrNot) throw new ApiError(404, "Task not found");
 
 
 
-return res
-    .status(200)
-    .json(
-        new ApiResponce(200, updatedTaskCompleteOrNot, "toggol succecfully")
-    )
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(200, updatedTaskCompleteOrNot, "toggol succecfully")
+        )
 
 })
 
-// const updated = await Task.findByIdAndUpdate(
-//   taskId,
-//   { $bit: { isCompleted: { xor: 1 } } },
-//   { new: true }
-// );
-// if (!updated) throw new ApiError(404, "Task not found");
+const taskDelete_bin = asyncHandler(async (req, res) => {
+    const { taskId } = req.body
+    // console.log("=======>",taskId);
+    const task = await Task.findById(taskId)
+    if (!task) {
+        throw new ApiError(404, "task now found")
+    }
+    const updatedTaskDeleteOrNot_moveToBin = await Task.findByIdAndUpdate(taskId,
+        {
+            $set:
+            {
+                isDeleted: !task.isDeleted,
+            }
+        }, { new: true }
+    );
 
-// return res
-// .status(200)
-// .json(new ApiResponce(200, { isCompleted: updated.isCompleted }, "Toggled successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(200, updatedTaskDeleteOrNot_moveToBin, "Task move to resycle Bin succsfully")
+        )
 
-export { taskCreate, taskComplete };
+
+})
+
+
+
+
+export { taskCreate, taskComplete, taskDelete_bin };
