@@ -23,6 +23,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
+    
     if (!username) {
         throw new ApiError(404, "User name is requare !")
     }
@@ -115,5 +116,4 @@ const logoutUser = asyncHandler(async (req, res) => {
             new ApiResponce(200, {}, "User logout succesfully")
         )
 })
-
 export { registerUser, loginUser, logoutUser };
