@@ -23,6 +23,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 }
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
+    // console.log("==========>",username, email, password);
     
     if (!username) {
         throw new ApiError(404, "User name is requare !")
@@ -100,9 +101,9 @@ const loginUser = asyncHandler(async (req, res) => {
         )
 })
 const logoutUser = asyncHandler(async (req, res) => {
-    await User.findByIdAndUpdate(req.user._id, {
+    await User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            refreshToken: undefined
+            refreshToken:null
         }
     }, { new: true })
     const option = {
@@ -116,4 +117,14 @@ const logoutUser = asyncHandler(async (req, res) => {
             new ApiResponce(200, {}, "User logout succesfully")
         )
 })
-export { registerUser, loginUser, logoutUser };
+const getUser = asyncHandler(async(req,res)=>{
+    const userId =req.user?._id
+    const username =await User.findById(userId).select("-password -binHistory -email -refreshToken") 
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponce(200,username,"user name flatch succefully")
+    )
+})
+export { registerUser, loginUser, logoutUser,getUser };
