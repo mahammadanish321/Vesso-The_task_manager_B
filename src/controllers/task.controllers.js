@@ -112,8 +112,6 @@ const editTask = asyncHandler(async (req, res) => {
             new ApiResponce(200, editedTask, "the update succesfully")
         )
 })
-//databace call match with owner
-//write a pipeline add the all fildes which have same owner and send the result to JSON 
 const showAllTask = asyncHandler(async (req, res) => {
     const userId = req.user?._id;
 
@@ -125,7 +123,7 @@ const showAllTask = asyncHandler(async (req, res) => {
 
     const tasks = await Task.find({
         owner: userId,
-        isDeleted: false,      // remove this filter if you want deleted also
+        // isDeleted: false,      // remove this filter if you want deleted also
     })
         .sort({ createdAt: -1 })  // latest first
         .populate("owner", "username email"); // optional: get user details
