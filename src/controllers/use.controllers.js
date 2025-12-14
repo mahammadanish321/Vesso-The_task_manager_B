@@ -24,7 +24,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
     // console.log("==========>",username, email, password);
-    
+
     if (!username) {
         throw new ApiError(404, "User name is requare !")
     }
@@ -90,20 +90,27 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedInUserAndDetails = await User.findById(User._id).select("-password -refreshToken")
     const option = {
         httpOnly: true,
-        secure: true
-    }
+        secure: false,      // 🔥 MUST be false for localhost
+        sameSite: "lax",    // 🔥 REQUIRED for cross-origin (3000 → 8000)
+        path: "/"
+    };
     return res
         .status(200)
         .cookie("accessToken", accessToken, option)
         .cookie("refreshToken", refreshToken, option)
+        .status(200)
         .json(
-            new ApiResponce(200, { User: loggedInUserAndDetails, accessToken }, "User login succesfully")
-        )
+            new ApiResponce(
+                200,
+                { user: loggedInUserAndDetails },
+                "User login successfully"
+            )
+        );
 })
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user?._id, {
         $set: {
-            refreshToken:null
+            refreshToken: null
         }
     }, { new: true })
     const option = {
@@ -117,14 +124,14 @@ const logoutUser = asyncHandler(async (req, res) => {
             new ApiResponce(200, {}, "User logout succesfully")
         )
 })
-const getUser = asyncHandler(async(req,res)=>{
-    const userId =req.user?._id
-    const username =await User.findById(userId).select("-password -binHistory -email -refreshToken") 
+const getUser = asyncHandler(async (req, res) => {
+    const userId = req.user?._id
+    const username = await User.findById(userId).select("-password -binHistory -email -refreshToken")
 
     return res
-    .status(200)
-    .json(
-        new ApiResponce(200,username,"user name flatch succefully")
-    )
+        .status(200)
+        .json(
+            new ApiResponce(200, username, "user name flatch succefully")
+        )
 })
-export { registerUser, loginUser, logoutUser,getUser };
+export { registerUser, loginUser, logoutUser, getUser };

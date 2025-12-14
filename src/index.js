@@ -16,6 +16,8 @@ connectDB()
         app.listen(port, () => {
             console.log(`\nServer is running at http://localhost:${port}`);
         })
+
+        
     })
     .catch((error) => {
         console.log(`mongoDB connetion feld:${error}`);
