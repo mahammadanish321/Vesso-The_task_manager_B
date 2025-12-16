@@ -64,6 +64,7 @@ const loginUser = asyncHandler(async (req, res) => {
     secure: true,        // REQUIRED (HTTPS)
     sameSite: "none",    // REQUIRED (cross-site)
     path: "/",
+    domain: ".onrender.com", // Allow for *.onrender.com
   };
 
   res
@@ -95,6 +96,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     secure: true,
     sameSite: "none",
     path: "/",
+    domain: ".onrender.com",
   };
 
   res

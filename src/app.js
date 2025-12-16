@@ -8,6 +8,8 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGIN, // https://vesso-the-task-manager-f.vercel.app
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -15,6 +17,8 @@ app.use(
 app.options("*", cors({
   origin: process.env.CORS_ORIGIN,
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json({ limit: "16kb" }));
