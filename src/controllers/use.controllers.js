@@ -90,8 +90,8 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedInUserAndDetails = await User.findById(User._id).select("-password -refreshToken")
     const option = {
         httpOnly: true,
-        secure: false,      // 🔥 MUST be false for localhost
-        sameSite: "lax",    // 🔥 REQUIRED for cross-origin (3000 → 8000)
+        secure: true,        // ✅ REQUIRED on HTTPS
+        sameSite: "none",    // ✅ REQUIRED for cross-site
         path: "/"
     };
     return res
