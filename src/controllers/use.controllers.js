@@ -62,51 +62,47 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.status(201).json(new ApiResponce(201, createdUser, "user created successfully"))
 });
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    if (!email) {
-        throw new ApiError(401, "place enter the user email");
-    }
-    if (!password) {
-        throw new ApiError(401, "place enter the user password");
-    }
+  const { email, password } = req.body;
 
-    const userAlreadyRegisterOrNot = await User.findOne(
-        {
-            $or:
-                [
-                    { email: email },
-                ]
-        }
-    )
-    if (!userAlreadyRegisterOrNot) {
-        throw new ApiError(401, "You are not regester yat to login register fist")
-    }
-    const chackPasswordIscorrectOrNot = await userAlreadyRegisterOrNot.isPasswordCorrect(password);
+  if (!email || !password) {
+    throw new ApiError(401, "Email and password required");
+  }
 
-    if (!chackPasswordIscorrectOrNot) {
-        throw new ApiError(401, "Your enterd password is not correct")
-    }
-    const { refreshToken, accessToken } = await generateAccessAndRefreshToken(userAlreadyRegisterOrNot._id)
-    const loggedInUserAndDetails = await User.findById(User._id).select("-password -refreshToken")
-    const option = {
-        httpOnly: true,
-        secure: true,        // ✅ REQUIRED on HTTPS
-        sameSite: "none",    // ✅ REQUIRED for cross-site
-        path: "/"
-    };
-    return res
-        .status(200)
-        .cookie("accessToken", accessToken, option)
-        .cookie("refreshToken", refreshToken, option)
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                { user: loggedInUserAndDetails },
-                "User login successfully"
-            )
-        );
-})
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(401, "User not registered");
+  }
+
+  const isValid = await user.isPasswordCorrect(password);
+  if (!isValid) {
+    throw new ApiError(401, "Incorrect password");
+  }
+
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshToken(user._id);
+
+  const safeUser = await User.findById(user._id)
+    .select("-password -refreshToken");
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+    domain: ".onrender.com"
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new ApiResponce(
+      200,
+      { user: safeUser },
+      "User login successfully"
+    ));
+});
+
 const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(req.user?._id, {
         $set: {
