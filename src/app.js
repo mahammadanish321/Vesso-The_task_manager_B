@@ -4,9 +4,35 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
+// Trust proxy is required for cookies to work securely on Render
+app.set("trust proxy", 1);
+
+// Enhanced CORS configuration
+const allowedOrigins = [
+  process.env.CORS_ORIGIN,
+  "https://vesso-the-task-manager-f.vercel.app", // explicit fallback
+  // Add other origins here if needed, e.g. local dev
+  // "http://localhost:5173" 
+].filter(Boolean); // remove undefined/null
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN, // https://vesso-the-task-manager-f.vercel.app
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is allowed (handling trailing slashes loosely)
+      const isAllowed = allowedOrigins.some(allowed =>
+        origin === allowed || origin === allowed + "/"
+      );
+
+      if (isAllowed) {
+        return callback(null, true);
+      } else {
+        console.log("Blocked by CORS:", origin); // Diagnostic log
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -15,7 +41,12 @@ app.use(
 
 // Handle preflight requests explicitly
 app.options("*", cors({
-  origin: process.env.CORS_ORIGIN,
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const isAllowed = allowedOrigins.some(allowed => origin === allowed || origin === allowed + "/");
+    if (isAllowed) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
