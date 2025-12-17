@@ -99,8 +99,8 @@ Follow these steps to get the project running on your local machine.
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://github.com/mahammadanish321/Vesso-The_task_manager_F.git
-    cd Task_Manager_Frontend
+    git clone https://github.com/mahammadanish321/Vesso-The_task_manager_B.git
+    cd Task_Manager_backend
     ```
 
 2.  **Launch the Application**
